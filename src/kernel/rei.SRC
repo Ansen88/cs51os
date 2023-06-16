@@ -1,0 +1,21 @@
+; test\2.SRC generated from: test\2.c
+; COMPILER INVOKED BY:
+;        d:\Keil1\C51\BIN\C51.EXE test\2.c LARGE ROM(COMPACT) OPTIMIZE(6,SPEED) BROWSE INCDIR(.\inc) SRC DEBUG OBJECTEXTEND PRINT(.\2.lst) OBJECT(.\output\2.obj)
+
+
+NAME	_rei
+
+?PR?re_i?rei           SEGMENT CODE INBLOCK 
+	PUBLIC	re_i
+; void re_i(void)
+
+	RSEG  ?PR?re_i?rei
+re_i:
+			; SOURCE LINE # 1
+; {
+			; SOURCE LINE # 2
+; }			; SOURCE LINE # 3
+	RETI  	
+; END OF re_i
+
+	END

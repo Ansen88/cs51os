@@ -1,0 +1,56 @@
+; src\kernel\dma1.SRC generated from: src\kernel\dma1.c
+; COMPILER INVOKED BY:
+;        D:\Program Files\Keil\C51\BIN\C51.EXE src\kernel\dma1.c LARGE ROM(COMPACT) REGFILE(.\51os.ORC) BROWSE INCDIR(.\inc) SRC DEBUG OBJECTEXTEND SYMBOLS PRINT(.\dma1.lst) OBJECT(dma1.obj)
+
+$NOMOD51
+
+NAME	DMA
+
+AUXR1	DATA	0A2H
+IE		DATA	0A8H
+?PR?_dma?DMA        SEGMENT CODE INBLOCK 
+	EXTRN	CODE (dis_all_int)
+	EXTRN	CODE (en_all_int)
+	PUBLIC	_dma
+
+; sfr AUXR1 = 0xA2;
+; unsigned char dma(unsigned char xdata *dst, unsigned char xdata *src, unsigned char num)
+
+	RSEG  ?PR?_dma?DMA
+_dma:
+	USING	0
+			; SOURCE LINE # 2
+
+;---- Variable 'num?042' assigned to Register 'R3' ----
+;---- Variable 'dst' assigned to Register 'DPTR0'----
+;---- Variable 'src' assigned to Register 'DPTR1'----
+	MOV		A,R7
+	MOV		R1,A
+
+	LCALL	dis_all_int
+
+	MOV		A,R3
+	JZ		?C0002
+	MOV		DPL,R1
+	MOV		DPH,R6
+	INC		AUXR1
+	MOV		DPL,R5
+	MOV		DPH,R4
+
+?C0001:
+	MOVX	A,@DPTR
+	INC		DPTR
+	DEC		AUXR1
+	MOVX	@DPTR,A
+	INC		DPTR
+	INC		AUXR1
+	DJNZ	R3,?C0001
+
+?C0002:
+	LCALL	en_all_int
+
+	MOV		R7,#01H
+	RET  	
+; END OF _dma
+
+	END

@@ -1,0 +1,842 @@
+; src\USR\graphic\graphic.SRC generated from: src\USR\graphic\graphic.c
+; COMPILER INVOKED BY:
+;        d:\Keil1\C51\BIN\C51.EXE src\USR\graphic\graphic.c LARGE ROM(COMPACT) OPTIMIZE(6,SPEED) BROWSE INCDIR(.\inc) SRC DEBUG OBJECTEXTEND PRINT(.\graphic.lst) OBJECT(.\output\graphic.obj)
+
+$NOMOD51
+
+NAME	GRAPHIC
+
+P0	DATA	080H
+P1	DATA	090H
+P2	DATA	0A0H
+P3	DATA	0B0H
+T0	BIT	0B0H.4
+AC	BIT	0D0H.6
+T1	BIT	0B0H.5
+T2	BIT	090H.0
+EA	BIT	0A8H.7
+IE	DATA	0A8H
+EXF2	BIT	0C8H.6
+RD	BIT	0B0H.7
+ES	BIT	0A8H.4
+IP	DATA	0B8H
+RI	BIT	098H.0
+INT0	BIT	0B0H.2
+CY	BIT	0D0H.7
+TI	BIT	098H.1
+INT1	BIT	0B0H.3
+RCAP2H	DATA	0CBH
+PS	BIT	0B8H.4
+SP	DATA	081H
+T2EX	BIT	090H.1
+OV	BIT	0D0H.2
+RCAP2L	DATA	0CAH
+C_T2	BIT	0C8H.1
+WR	BIT	0B0H.6
+RCLK	BIT	0C8H.5
+TCLK	BIT	0C8H.4
+SBUF	DATA	099H
+PCON	DATA	087H
+SCON	DATA	098H
+TMOD	DATA	089H
+TCON	DATA	088H
+IE0	BIT	088H.1
+IE1	BIT	088H.3
+AUXR	DATA	08EH
+B	DATA	0F0H
+CP_RL2	BIT	0C8H.0
+ACC	DATA	0E0H
+ET0	BIT	0A8H.1
+ET1	BIT	0A8H.3
+TF0	BIT	088H.5
+ET2	BIT	0A8H.5
+TF1	BIT	088H.7
+TF2	BIT	0C8H.7
+RB8	BIT	098H.2
+TH0	DATA	08CH
+EX0	BIT	0A8H.0
+IT0	BIT	088H.0
+TH1	DATA	08DH
+TB8	BIT	098H.3
+EX1	BIT	0A8H.2
+IT1	BIT	088H.2
+TH2	DATA	0CDH
+P	BIT	0D0H.0
+SM0	BIT	098H.7
+TL0	DATA	08AH
+SM1	BIT	098H.6
+TL1	DATA	08BH
+SM2	BIT	098H.5
+TL2	DATA	0CCH
+PT0	BIT	0B8H.1
+PT1	BIT	0B8H.3
+RS0	BIT	0D0H.3
+PT2	BIT	0B8H.5
+TR0	BIT	088H.4
+RS1	BIT	0D0H.4
+TR1	BIT	088H.6
+TR2	BIT	0C8H.2
+PX0	BIT	0B8H.0
+PX1	BIT	0B8H.2
+DPH	DATA	083H
+DPL	DATA	082H
+IPH	DATA	0B7H
+EXEN2	BIT	0C8H.3
+REN	BIT	098H.4
+T2CON	DATA	0C8H
+SADEN	DATA	0B9H
+RXD	BIT	0B0H.0
+SADDR	DATA	0A9H
+CKCON	DATA	08FH
+TXD	BIT	0B0H.1
+AUXR1	DATA	0A2H
+F0	BIT	0D0H.5
+F1	BIT	0D0H.1
+PSW	DATA	0D0H
+?PR?_draw_line?GRAPHIC                   SEGMENT CODE INBLOCK 
+?XD?_draw_line?GRAPHIC                   SEGMENT XDATA OVERLAYABLE 
+?PR?_d_circle?GRAPHIC                    SEGMENT CODE INBLOCK 
+?PR?_framebuf_update?GRAPHIC             SEGMENT CODE INBLOCK 
+?XD?_framebuf_update?GRAPHIC             SEGMENT XDATA OVERLAYABLE 
+?PR?_fill?GRAPHIC    SEGMENT CODE INBLOCK 
+?XD?_fill?GRAPHIC    SEGMENT XDATA OVERLAYABLE 
+?PR?_screen_fill?GRAPHIC                 SEGMENT CODE INBLOCK 
+?XD?_screen_fill?GRAPHIC                 SEGMENT XDATA OVERLAYABLE 
+?CO?GRAPHIC          SEGMENT CODE 
+?XD?GRAPHIC          SEGMENT XDATA 
+	EXTRN	CODE (screen_download)
+	EXTRN	CODE (_l_math)
+	EXTRN	XDATA (?_l_math?BYTE)
+	PUBLIC	framebuf0
+	PUBLIC	tmp_buf
+	PUBLIC	screen_bank
+	PUBLIC	framebuf1
+	PUBLIC	bank_add
+	PUBLIC	?_screen_fill?BYTE
+	PUBLIC	_screen_fill
+	PUBLIC	?_framebuf_update?BYTE
+	PUBLIC	_framebuf_update
+	PUBLIC	_d_circle
+	PUBLIC	?_draw_line?BYTE
+	PUBLIC	_draw_line
+
+	XSEG  AT  0200H
+      framebuf1:   DS   512
+
+	XSEG  AT  03FC0H
+        tmp_buf:   DS   64
+
+	XSEG  AT  00H
+      framebuf0:   DS   512
+
+	RSEG  ?XD?_screen_fill?GRAPHIC
+?_screen_fill?BYTE:
+         x1?464:   DS   1
+	ORG  1
+         y1?465:   DS   1
+	ORG  2
+         x2?466:   DS   1
+	ORG  3
+         y2?467:   DS   1
+	ORG  4
+        dat?468:   DS   1
+	ORG  5
+ bank_start?469:   DS   1
+	ORG  6
+   bank_end?470:   DS   1
+
+	RSEG  ?XD?_fill?GRAPHIC
+?_fill?BYTE:
+         x1?352:   DS   1
+         y1?353:   DS   1
+	ORG  2
+         x2?354:   DS   1
+	ORG  3
+         y2?355:   DS   1
+	ORG  4
+        dat?356:   DS   1
+	ORG  5
+       bank?357:   DS   1
+	ORG  6
+   quotient?358:   DS   1
+	ORG  7
+    residue?359:   DS   1
+	ORG  8
+  quotient1?360:   DS   1
+	ORG  9
+          i?361:   DS   1
+	ORG  10
+        tmp?362:   DS   1
+	ORG  11
+          p?363:   DS   2
+
+	RSEG  ?XD?_framebuf_update?GRAPHIC
+?_framebuf_update?BYTE:
+         x1?247:   DS   1
+	ORG  1
+         y1?248:   DS   1
+	ORG  2
+         x2?249:   DS   1
+	ORG  3
+         y2?250:   DS   1
+	ORG  4
+        add?251:   DS   3
+
+	RSEG  ?XD?_draw_line?GRAPHIC
+?_draw_line?BYTE:
+         x1?040:   DS   1
+	ORG  1
+         y1?041:   DS   1
+	ORG  2
+         x2?042:   DS   1
+	ORG  3
+         y2?043:   DS   1
+
+	RSEG  ?XD?GRAPHIC
+    screen_bank:   DS   1
+
+	RSEG  ?CO?GRAPHIC
+bank_add:
+	DB	000H
+	DB	040H
+	DB	080H
+
+; #include "config.h"
+; #include "kernel.h"
+; #include "dma.h"
+; #include "gmath.h"
+; #include "lcm.h"
+; #include "graphic.h"
+; 
+; unsigned char xdata tmp_buf[64] _at_ XRAM_END-63;
+; unsigned char xdata framebuf0[8][64] _at_ 0;
+; unsigned char xdata framebuf1[8][64] _at_ 512; 
+; unsigned char xdata screen_bank;
+; unsigned char code bank_add[3]={0,64,128};
+; 
+; #define	ABSUB(x,y)	(((x)>(y))?((x)-(y)):((y)-(x)))
+;  
+; void draw_line(unsigned char x1,unsigned char y1,unsigned char x2,unsigned char y2)
+
+	RSEG  ?PR?_draw_line?GRAPHIC
+_draw_line:
+	USING	0
+			; SOURCE LINE # 16
+	MOV  	DPTR,#y1?041
+	MOV  	A,R5
+	MOVX 	@DPTR,A
+	MOV  	DPTR,#x1?040
+	MOV  	A,R7
+	MOVX 	@DPTR,A
+	MOV  	DPTR,#x2?042
+	MOV  	A,R3
+	MOVX 	@DPTR,A
+; {
+			; SOURCE LINE # 17
+; 	if(x2>x1)
+			; SOURCE LINE # 18
+	SETB 	C
+	SUBB 	A,R7
+	JC   	?C0001
+; 		l_math(x1,y1,x2,y2);
+			; SOURCE LINE # 19
+	MOV  	DPTR,#x1?040
+	MOVX 	A,@DPTR
+	MOV  	R7,A
+	INC  	DPTR
+	MOVX 	A,@DPTR
+	MOV  	R5,A
+	INC  	DPTR
+	MOVX 	A,@DPTR
+	MOV  	R3,A
+	INC  	DPTR
+	MOVX 	A,@DPTR
+	MOV  	DPTR,#?_l_math?BYTE+03H
+	MOVX 	@DPTR,A
+	LCALL	_l_math
+	RET  	
+?C0001:
+; 	else
+; 		l_math(x2,y2,x1,y1);	
+			; SOURCE LINE # 21
+	MOV  	DPTR,#x2?042
+	MOVX 	A,@DPTR
+	MOV  	R7,A
+	INC  	DPTR
+	MOVX 	A,@DPTR
+	MOV  	R5,A
+	MOV  	DPTR,#x1?040
+	MOVX 	A,@DPTR
+	MOV  	R3,A
+	INC  	DPTR
+	MOVX 	A,@DPTR
+	MOV  	DPTR,#?_l_math?BYTE+03H
+	MOVX 	@DPTR,A
+	LCALL	_l_math
+; }
+			; SOURCE LINE # 22
+?C0003:
+	RET  	
+; END OF _draw_line
+
+; 
+; unsigned char d_circle(unsigned char x,unsigned char y,unsigned char r)
+
+	RSEG  ?PR?_d_circle?GRAPHIC
+_d_circle:
+	USING	0
+			; SOURCE LINE # 24
+;---- Variable 'x?144' assigned to Register 'R7' ----
+;---- Variable 'r?146' assigned to Register 'R3' ----
+;---- Variable 'y?145' assigned to Register 'R5' ----
+; {
+			; SOURCE LINE # 25
+; 	if(x>y)
+			; SOURCE LINE # 26
+	MOV  	A,R7
+	SETB 	C
+	SUBB 	A,R5
+	JC   	?C0004
+; 		return r+1;
+			; SOURCE LINE # 27
+	MOV  	A,R3
+	INC  	A
+	MOV  	R7,A
+	RET  	
+?C0004:
+; 	else
+; 		return r-1;
+			; SOURCE LINE # 29
+	CLR  	C
+	MOV  	A,R3
+	SUBB 	A,#01H
+	MOV  	R7,A
+; }
+			; SOURCE LINE # 30
+?C0005:
+	RET  	
+; END OF _d_circle
+
+; 
+; /*************** API ****************/
+; void framebuf_update(unsigned char x1,unsigned char y1,unsigned char x2,unsigned char y2,unsigned char *add)
+
+	RSEG  ?PR?_framebuf_update?GRAPHIC
+_framebuf_update:
+			; SOURCE LINE # 33
+	MOV  	DPTR,#x1?247
+	MOV  	A,R7
+	MOVX 	@DPTR,A
+	INC  	DPTR
+	MOV  	A,R5
+	MOVX 	@DPTR,A
+	INC  	DPTR
+	MOV  	A,R3
+	MOVX 	@DPTR,A
+; {
+			; SOURCE LINE # 34
+; }
+			; SOURCE LINE # 35
+	RET  	
+; END OF _framebuf_update
+
+; 
+; static void fill(unsigned char x1,unsigned char y1,unsigned char x2,unsigned char y2,unsigned char dat,unsigned char bank)
+
+	RSEG  ?PR?_fill?GRAPHIC
+_fill:
+	USING	0
+			; SOURCE LINE # 37
+	MOV  	DPTR,#x1?352
+	MOV  	A,R7
+	MOVX 	@DPTR,A
+	MOV  	DPTR,#x2?354
+	MOV  	A,R3
+	MOVX 	@DPTR,A
+;---- Variable 'y1?353' assigned to Register 'R5' ----
+; {
+			; SOURCE LINE # 38
+; 	unsigned char xdata quotient,residue,quotient1;
+; 	unsigned char xdata i,tmp;
+; 	unsigned char xdata *p;
+; 
+; 	quotient=y1/8;
+			; SOURCE LINE # 43
+	MOV  	A,R5
+	RRC  	A
+	RRC  	A
+	RRC  	A
+	ANL  	A,#01FH
+	MOV  	DPTR,#quotient?358
+	MOVX 	@DPTR,A
+; 	residue=y1%8;
+			; SOURCE LINE # 44
+	MOV  	A,R5
+	ANL  	A,#07H
+	INC  	DPTR
+	MOVX 	@DPTR,A
+; 	quotient1=y2/8+1;
+			; SOURCE LINE # 45
+	MOV  	DPTR,#y2?355
+	MOVX 	A,@DPTR
+	MOV  	R7,A
+	RRC  	A
+	RRC  	A
+	RRC  	A
+	ANL  	A,#01FH
+	INC  	A
+	MOV  	DPTR,#quotient1?360
+	MOVX 	@DPTR,A
+; 
+; }
+			; SOURCE LINE # 47
+	RET  	
+; END OF _fill
+
+; 
+; void screen_fill(unsigned char x1,unsigned char y1,unsigned char x2,unsigned char y2,unsigned char dat)
+
+	RSEG  ?PR?_screen_fill?GRAPHIC
+_screen_fill:
+	USING	0
+			; SOURCE LINE # 49
+	MOV  	DPTR,#y1?465
+	MOV  	A,R5
+	MOVX 	@DPTR,A
+	INC  	DPTR
+	MOV  	A,R3
+	MOVX 	@DPTR,A
+	MOV  	DPTR,#x1?464
+	MOV  	A,R7
+	MOVX 	@DPTR,A
+; {	
+			; SOURCE LINE # 50
+; 	unsigned char xdata bank_start,bank_end;
+; 	if(x1<64)
+			; SOURCE LINE # 52
+	CLR  	C
+	SUBB 	A,#040H
+	JNC  	?C0009
+; 		bank_start=0;
+			; SOURCE LINE # 53
+	CLR  	A
+	MOV  	DPTR,#bank_start?469
+	MOVX 	@DPTR,A
+	SJMP 	?C0010
+?C0009:
+; 	else if(x1<128)
+			; SOURCE LINE # 54
+	MOV  	DPTR,#x1?464
+	MOVX 	A,@DPTR
+	CLR  	C
+	SUBB 	A,#080H
+	JNC  	?C0011
+; 		bank_start=1;
+			; SOURCE LINE # 55
+	MOV  	DPTR,#bank_start?469
+	MOV  	A,#01H
+	MOVX 	@DPTR,A
+	SJMP 	?C0010
+?C0011:
+; 	else bank_start=2;
+			; SOURCE LINE # 56
+	MOV  	DPTR,#bank_start?469
+	MOV  	A,#02H
+	MOVX 	@DPTR,A
+?C0010:
+; 	
+; 	if(x2>128)
+			; SOURCE LINE # 58
+	MOV  	DPTR,#x2?466
+	MOVX 	A,@DPTR
+	MOV  	R7,A
+	SETB 	C
+	SUBB 	A,#080H
+	JC   	?C0013
+; 		bank_end=2;
+			; SOURCE LINE # 59
+	MOV  	DPTR,#bank_end?470
+	MOV  	A,#02H
+	MOVX 	@DPTR,A
+	SJMP 	?C0014
+?C0013:
+; 	else if(x2>64)
+			; SOURCE LINE # 60
+	MOV  	A,R7
+	SETB 	C
+	SUBB 	A,#040H
+	JC   	?C0015
+; 		bank_end=1;
+			; SOURCE LINE # 61
+	MOV  	DPTR,#bank_end?470
+	MOV  	A,#01H
+	MOVX 	@DPTR,A
+	SJMP 	?C0014
+?C0015:
+; 	else bank_end=0;
+			; SOURCE LINE # 62
+	CLR  	A
+	MOV  	DPTR,#bank_end?470
+	MOVX 	@DPTR,A
+?C0014:
+; 	
+; 	if(!(bank_start-1))
+			; SOURCE LINE # 64
+	MOV  	DPTR,#bank_start?469
+	MOVX 	A,@DPTR
+	DEC  	A
+	JZ   	$ + 4H
+	AJMP 	?C0017
+; 	{
+			; SOURCE LINE # 65
+; 		if(!(bank_end-1))
+			; SOURCE LINE # 66
+	INC  	DPTR
+	MOVX 	A,@DPTR
+	MOV  	R6,A
+	DEC  	A
+	JNZ  	?C0018
+; 		{
+			; SOURCE LINE # 67
+; 			fill(x1,y1,x2,y2,dat,1);
+			; SOURCE LINE # 68
+	MOV  	DPTR,#x1?464
+	MOVX 	A,@DPTR
+	MOV  	R7,A
+	INC  	DPTR
+	MOVX 	A,@DPTR
+	MOV  	R5,A
+	INC  	DPTR
+	MOVX 	A,@DPTR
+	MOV  	R3,A
+	INC  	DPTR
+	MOVX 	A,@DPTR
+	MOV  	DPTR,#?_fill?BYTE+03H
+	MOVX 	@DPTR,A
+	MOV  	DPTR,#dat?468
+	MOVX 	A,@DPTR
+	MOV  	DPTR,#?_fill?BYTE+04H
+	MOVX 	@DPTR,A
+	INC  	DPTR
+	MOV  	A,#01H
+	MOVX 	@DPTR,A
+	LCALL	_fill
+; 		}
+			; SOURCE LINE # 69
+	RET  	
+?C0018:
+; 		else if(!(bank_end-screen_bank))
+			; SOURCE LINE # 70
+	MOV  	DPTR,#screen_bank
+	MOVX 	A,@DPTR
+	MOV  	R7,A
+	CLR  	C
+	MOV  	A,R6
+	SUBB 	A,R7
+	JNZ  	?C0020
+; 		{
+			; SOURCE LINE # 71
+; 			fill(x1,y1,63,y2,dat,1);
+			; SOURCE LINE # 72
+	MOV  	DPTR,#x1?464
+	MOVX 	A,@DPTR
+	MOV  	R7,A
+	INC  	DPTR
+	MOVX 	A,@DPTR
+	MOV  	R5,A
+	MOV  	DPTR,#y2?467
+	MOVX 	A,@DPTR
+	MOV  	DPTR,#?_fill?BYTE+03H
+	MOVX 	@DPTR,A
+	MOV  	DPTR,#dat?468
+	MOVX 	A,@DPTR
+	MOV  	DPTR,#?_fill?BYTE+04H
+	MOVX 	@DPTR,A
+	INC  	DPTR
+	MOV  	A,#01H
+	MOVX 	@DPTR,A
+	MOV  	R3,#03FH
+	LCALL	_fill
+; 			fill(0,y1,x2,y2,dat,0);
+			; SOURCE LINE # 73
+	MOV  	DPTR,#y1?465
+	MOVX 	A,@DPTR
+	MOV  	R5,A
+	INC  	DPTR
+	MOVX 	A,@DPTR
+	MOV  	R3,A
+	INC  	DPTR
+	MOVX 	A,@DPTR
+	MOV  	DPTR,#?_fill?BYTE+03H
+	MOVX 	@DPTR,A
+	MOV  	DPTR,#dat?468
+	MOVX 	A,@DPTR
+	MOV  	DPTR,#?_fill?BYTE+04H
+	MOVX 	@DPTR,A
+	CLR  	A
+	INC  	DPTR
+	MOVX 	@DPTR,A
+	MOV  	R7,A
+	LCALL	_fill
+; 		}
+			; SOURCE LINE # 74
+	RET  	
+?C0020:
+; 		else
+; 		{
+			; SOURCE LINE # 76
+; 			screen_download();
+			; SOURCE LINE # 77
+	LCALL	screen_download
+; 			fill(x1,y1,63,y2,dat,1);
+			; SOURCE LINE # 78
+	MOV  	DPTR,#x1?464
+	MOVX 	A,@DPTR
+	MOV  	R7,A
+	INC  	DPTR
+	MOVX 	A,@DPTR
+	MOV  	R5,A
+	MOV  	DPTR,#y2?467
+	MOVX 	A,@DPTR
+	MOV  	DPTR,#?_fill?BYTE+03H
+	MOVX 	@DPTR,A
+	MOV  	DPTR,#dat?468
+	MOVX 	A,@DPTR
+	MOV  	DPTR,#?_fill?BYTE+04H
+	MOVX 	@DPTR,A
+	INC  	DPTR
+	MOV  	A,#01H
+	MOVX 	@DPTR,A
+	MOV  	R3,#03FH
+	LCALL	_fill
+; 			fill(0,y1,x2,y2,dat,0);
+			; SOURCE LINE # 79
+	MOV  	DPTR,#y1?465
+	MOVX 	A,@DPTR
+	MOV  	R5,A
+	INC  	DPTR
+	MOVX 	A,@DPTR
+	MOV  	R3,A
+	INC  	DPTR
+	MOVX 	A,@DPTR
+	MOV  	DPTR,#?_fill?BYTE+03H
+	MOVX 	@DPTR,A
+	MOV  	DPTR,#dat?468
+	MOVX 	A,@DPTR
+	MOV  	DPTR,#?_fill?BYTE+04H
+	MOVX 	@DPTR,A
+	CLR  	A
+	INC  	DPTR
+	MOVX 	@DPTR,A
+	MOV  	R7,A
+	LCALL	_fill
+; 		}
+			; SOURCE LINE # 80
+; 	}
+			; SOURCE LINE # 81
+	RET  	
+?C0017:
+; 	else if(screen_bank==bank_start)
+			; SOURCE LINE # 82
+	MOV  	DPTR,#bank_start?469
+	MOVX 	A,@DPTR
+	MOV  	R7,A
+	MOV  	DPTR,#screen_bank
+	MOVX 	A,@DPTR
+	MOV  	R6,A
+	XRL  	A,R7
+	JNZ  	?C0023
+; 	{							   
+			; SOURCE LINE # 83
+; 		if(screen_bank==bank_end)
+			; SOURCE LINE # 84
+	MOV  	DPTR,#bank_end?470
+	MOVX 	A,@DPTR
+	MOV  	R7,A
+	MOV  	A,R6
+	CJNE 	A,AR7,?C0024
+; 		{
+			; SOURCE LINE # 85
+; 			fill(x1,y1,x2,y2,dat,0);
+			; SOURCE LINE # 86
+	MOV  	DPTR,#x1?464
+	MOVX 	A,@DPTR
+	MOV  	R7,A
+	INC  	DPTR
+	MOVX 	A,@DPTR
+	MOV  	R5,A
+	INC  	DPTR
+	MOVX 	A,@DPTR
+	MOV  	R3,A
+	INC  	DPTR
+	MOVX 	A,@DPTR
+	MOV  	DPTR,#?_fill?BYTE+03H
+	MOVX 	@DPTR,A
+	MOV  	DPTR,#dat?468
+	MOVX 	A,@DPTR
+	MOV  	DPTR,#?_fill?BYTE+04H
+	MOVX 	@DPTR,A
+	CLR  	A
+	INC  	DPTR
+	MOVX 	@DPTR,A
+	LCALL	_fill
+; 		}		
+			; SOURCE LINE # 87
+	RET  	
+?C0024:
+; 		else
+; 		{
+			; SOURCE LINE # 89
+; 			fill(x1,y1,x2,y2,dat,0);
+			; SOURCE LINE # 90
+	MOV  	DPTR,#x1?464
+	MOVX 	A,@DPTR
+	MOV  	R7,A
+	INC  	DPTR
+	MOVX 	A,@DPTR
+	MOV  	R5,A
+	INC  	DPTR
+	MOVX 	A,@DPTR
+	MOV  	R3,A
+	INC  	DPTR
+	MOVX 	A,@DPTR
+	MOV  	DPTR,#?_fill?BYTE+03H
+	MOVX 	@DPTR,A
+	MOV  	DPTR,#dat?468
+	MOVX 	A,@DPTR
+	MOV  	DPTR,#?_fill?BYTE+04H
+	MOVX 	@DPTR,A
+	CLR  	A
+	INC  	DPTR
+	MOVX 	@DPTR,A
+	LCALL	_fill
+; 			screen_download();
+			; SOURCE LINE # 91
+	LCALL	screen_download
+; 			fill(x1,y1,x2,y2,dat,0);
+			; SOURCE LINE # 92
+	MOV  	DPTR,#x1?464
+	MOVX 	A,@DPTR
+	MOV  	R7,A
+	INC  	DPTR
+	MOVX 	A,@DPTR
+	MOV  	R5,A
+	INC  	DPTR
+	MOVX 	A,@DPTR
+	MOV  	R3,A
+	INC  	DPTR
+	MOVX 	A,@DPTR
+	MOV  	DPTR,#?_fill?BYTE+03H
+	MOVX 	@DPTR,A
+	MOV  	DPTR,#dat?468
+	MOVX 	A,@DPTR
+	MOV  	DPTR,#?_fill?BYTE+04H
+	MOVX 	@DPTR,A
+	CLR  	A
+	INC  	DPTR
+	MOVX 	@DPTR,A
+	LCALL	_fill
+; 		}
+			; SOURCE LINE # 93
+; 	}	
+			; SOURCE LINE # 94
+	RET  	
+?C0023:
+; 	else if(screen_bank==bank_end)
+			; SOURCE LINE # 95
+	MOV  	DPTR,#bank_end?470
+	MOVX 	A,@DPTR
+	MOV  	R7,A
+	MOV  	DPTR,#screen_bank
+	MOVX 	A,@DPTR
+	XRL  	A,R7
+	JNZ  	?C0027
+; 	{
+			; SOURCE LINE # 96
+; 		fill(0,y1,x2,y2,dat,0);
+			; SOURCE LINE # 97
+	MOV  	DPTR,#y1?465
+	MOVX 	A,@DPTR
+	MOV  	R5,A
+	INC  	DPTR
+	MOVX 	A,@DPTR
+	MOV  	R3,A
+	INC  	DPTR
+	MOVX 	A,@DPTR
+	MOV  	DPTR,#?_fill?BYTE+03H
+	MOVX 	@DPTR,A
+	MOV  	DPTR,#dat?468
+	MOVX 	A,@DPTR
+	MOV  	DPTR,#?_fill?BYTE+04H
+	MOVX 	@DPTR,A
+	CLR  	A
+	INC  	DPTR
+	MOVX 	@DPTR,A
+	MOV  	R7,A
+	LCALL	_fill
+; 		screen_download();
+			; SOURCE LINE # 98
+	LCALL	screen_download
+; 		fill(x1,y1,63,y2,dat,0);
+			; SOURCE LINE # 99
+	MOV  	DPTR,#x1?464
+	MOVX 	A,@DPTR
+	MOV  	R7,A
+	INC  	DPTR
+	MOVX 	A,@DPTR
+	MOV  	R5,A
+	MOV  	DPTR,#y2?467
+	MOVX 	A,@DPTR
+	MOV  	DPTR,#?_fill?BYTE+03H
+	MOVX 	@DPTR,A
+	MOV  	DPTR,#dat?468
+	MOVX 	A,@DPTR
+	MOV  	DPTR,#?_fill?BYTE+04H
+	MOVX 	@DPTR,A
+	CLR  	A
+	INC  	DPTR
+	MOVX 	@DPTR,A
+	MOV  	R3,#03FH
+	LCALL	_fill
+; 	}
+			; SOURCE LINE # 100
+	RET  	
+?C0027:
+; 	else
+; 	{
+			; SOURCE LINE # 102
+; 		screen_download();
+			; SOURCE LINE # 103
+	LCALL	screen_download
+; 		fill(x1,y1,x2,y2,dat,0);
+			; SOURCE LINE # 104
+	MOV  	DPTR,#x1?464
+	MOVX 	A,@DPTR
+	MOV  	R7,A
+	INC  	DPTR
+	MOVX 	A,@DPTR
+	MOV  	R5,A
+	INC  	DPTR
+	MOVX 	A,@DPTR
+	MOV  	R3,A
+	INC  	DPTR
+	MOVX 	A,@DPTR
+	MOV  	DPTR,#?_fill?BYTE+03H
+	MOVX 	@DPTR,A
+	MOV  	DPTR,#dat?468
+	MOVX 	A,@DPTR
+	MOV  	DPTR,#?_fill?BYTE+04H
+	MOVX 	@DPTR,A
+	CLR  	A
+	INC  	DPTR
+	MOVX 	@DPTR,A
+	LCALL	_fill
+; 	}
+			; SOURCE LINE # 105
+; }
+			; SOURCE LINE # 106
+?C0029:
+	RET  	
+; END OF _screen_fill
+
+	END
